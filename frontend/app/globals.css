@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --netflix-red: #e50914;
+  --netflix-red-dark: #b20710;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: #06070a;
+  color: #f4f4f5;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+}
+
+.netflix-auth-bg {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.9)),
+    radial-gradient(130% 70% at 50% -20%, rgba(229, 9, 20, 0.35), rgba(0, 0, 0, 0)),
+    linear-gradient(45deg, #101010 0%, #1a1a1a 35%, #0b0b0b 100%);
+}
+
+.netflix-card {
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(1px);
+}
+
+.netflix-red-button {
+  background: var(--netflix-red);
+}
+
+.netflix-red-button:hover {
+  background: var(--netflix-red-dark);
+}
