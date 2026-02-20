@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-zinc-950 to-black text-white">
+    <div className="min-h-screen bg-linear-to-b from-slate-950 via-zinc-950 to-black text-white">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-emerald-400 text-black font-bold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-cyan-400 to-emerald-400 text-black font-bold">
             AH
           </div>
           <div className="text-lg font-semibold tracking-wide">AimeHub</div>
@@ -81,7 +81,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-8">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-white/10 via-white/5 to-transparent p-8">
             <div className="absolute right-6 top-6 rounded-full bg-emerald-400/20 px-3 py-1 text-xs text-emerald-300">
               Live reactions
             </div>
@@ -116,7 +116,7 @@ export default function Home() {
                   Studio Nova • 12 eps • Ongoing
                 </p>
               </div>
-              <div className="rounded-2xl bg-gradient-to-r from-cyan-500/20 to-emerald-500/10 p-4 text-sm text-zinc-200">
+              <div className="rounded-2xl bg-linear-to-r from-cyan-500/20 to-emerald-500/10 p-4 text-sm text-zinc-200">
                 4,812 fans are watching the live episode thread right now.
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function Home() {
               (title) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-4"
+                  className="rounded-2xl border border-white/10 bg-linear-to-br from-white/5 to-transparent p-4"
                 >
                   <div className="h-32 rounded-xl bg-white/10" />
                   <h3 className="mt-4 text-lg font-semibold">{title}</h3>
