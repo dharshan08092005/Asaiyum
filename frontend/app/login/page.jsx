@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
@@ -28,7 +28,7 @@ function GoogleIcon() {
   );
 }
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered");
@@ -143,3 +143,12 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="netflix-auth-bg flex min-h-screen items-center justify-center text-white">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
