@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum ThreadType {
+  MEGATHREAD
+  LIVE
+  DISCUSSION
+}
+
+enum WatchStatus {
+  PLANNED
+  WATCHING
+  COMPLETED
+  DROPPED
+}
+
+model User {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  name              String?
+  username          String?   @unique
+  email             String?   @unique
+  emailVerified     DateTime?
+  password          String?
+  image             String?
+  bio               String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  accounts          Account[]
+  sessions          Session[]
+  recommendations   Recommendation[]
+  watchlist         Watchlist[]
+  threads           Thread[]
+  posts             Post[]
+  comments          Comment[]
+  votes             Vote[]
+  pollVotes         PollVote[]
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Anime {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  malId       Int       @unique
+  title       String
+  titleJp     String?
+  synopsis    String?
+  studio      String?
+  airDate     DateTime?
+  status      String?
+  trailerUrl  String?
+  posterUrl   String?
+  episodes    Int?
+  genres      String[]
+  themes      String[]
+  rating      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  threads     Thread[]
+  posts       Post[]
+  recommendations Recommendation[]
+  watchlist   Watchlist[]
+}
+
+model Recommendation {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  animeId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
+  @@index([animeId, createdAt])
+}
+
+model Watchlist {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String      @db.ObjectId
+  animeId   String      @db.ObjectId
+  status    WatchStatus @default(PLANNED)
+  updatedAt DateTime    @updatedAt
+  createdAt DateTime    @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
+}
+
+model Thread {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  animeId   String?    @db.ObjectId
+  title     String
+  type      ThreadType @default(DISCUSSION)
+  createdBy String     @db.ObjectId
+  createdAt DateTime   @default(now())
+
+  anime  Anime? @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  posts  Post[]
+}
+
+model Post {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  threadId    String    @db.ObjectId
+  animeId     String?   @db.ObjectId
+  userId      String    @db.ObjectId
+  content     String
+  imageUrl    String?
+  hasSpoilers Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  thread  Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  anime   Anime? @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  author  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments Comment[]
+  polls    Poll[]
+
+  @@index([threadId, createdAt])
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+}
+
+model Poll {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String    @db.ObjectId
+  question  String
+  options   Json
+  endsAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  post  Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  votes PollVote[]
+}
+
+model PollVote {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  pollId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  option    Int
+  createdAt DateTime @default(now())
+
+  poll Poll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+}
+
+model Vote {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  entityType String
+  entityId   String
+  value      Int
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+}

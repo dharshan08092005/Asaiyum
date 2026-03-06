@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 function GoogleIcon() {
   return (
@@ -23,18 +27,69 @@ function GoogleIcon() {
   );
 }
 
-export const metadata = {
-  title: "Sign Up",
-  description: "Create your AimeHub account",
-};
-
 export default function SignupPage() {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const formData = new FormData(e.target);
+    const name = formData.get("name");
+    const email = formData.get("email");
+    const password = formData.get("password");
+    const confirmPassword = formData.get("confirm-password");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Something went wrong.");
+        setLoading(false);
+        return;
+      }
+
+      // Redirect to login page on success
+      router.push("/login?registered=true");
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="netflix-auth-bg flex min-h-screen items-center justify-center px-4 py-8">
       <main className="netflix-card w-full max-w-md rounded-md px-7 py-10 text-white shadow-2xl sm:px-14">
         <h1 className="mb-7 text-3xl font-bold tracking-tight">Sign Up</h1>
 
-        <form className="space-y-4">
+        {error && (
+          <div className="mb-4 rounded bg-red-500/20 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             id="name"
             name="name"
@@ -74,9 +129,10 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            className="netflix-red-button mt-2 w-full rounded py-3 text-sm font-semibold text-white transition"
+            disabled={loading}
+            className="netflix-red-button mt-2 w-full rounded py-3 text-sm font-semibold text-white transition disabled:opacity-50"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 

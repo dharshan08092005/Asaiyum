@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 function GoogleIcon() {
   return (
@@ -23,18 +28,63 @@ function GoogleIcon() {
   );
 }
 
-export const metadata = {
-  title: "Sign In",
-  description: "Sign in to your account",
-};
-
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const registered = searchParams.get("registered");
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const formData = new FormData(e.target);
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Invalid email or password.");
+        setLoading(false);
+        return;
+      }
+
+      // Redirect to home page on success
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="netflix-auth-bg flex min-h-screen items-center justify-center px-4 py-8">
       <main className="netflix-card w-full max-w-md rounded-md px-7 py-10 text-white shadow-2xl sm:px-14">
         <h1 className="mb-7 text-3xl font-bold tracking-tight">Sign In</h1>
 
-        <form className="space-y-4">
+        {registered && (
+          <div className="mb-4 rounded bg-green-500/20 px-4 py-3 text-sm text-green-300">
+            Account created successfully! Please sign in.
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-4 rounded bg-red-500/20 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             id="email"
             name="email"
@@ -56,9 +106,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="netflix-red-button mt-2 w-full rounded py-3 text-sm font-semibold text-white transition"
+            disabled={loading}
+            className="netflix-red-button mt-2 w-full rounded py-3 text-sm font-semibold text-white transition disabled:opacity-50"
           >
-            Sign In
+            {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
 

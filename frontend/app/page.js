@@ -1,46 +1,31 @@
+"use client";
+
 import Link from "next/link";
+import Navbar from "@/app/components/Navbar";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  return (
-    <div className="min-h-screen bg-linear-to-b from-slate-950 via-zinc-950 to-black text-white">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-cyan-400 to-emerald-400 text-black font-bold">
-            AH
-          </div>
-          <div className="text-lg font-semibold tracking-wide">AimeHub</div>
-        </div>
-        <nav className="hidden items-center gap-6 text-sm text-zinc-300 md:flex">
-          <Link href="/discover" className="hover:text-white">
-            Discover
-          </Link>
-          <Link href="/community" className="hover:text-white">
-            Community
-          </Link>
-          <Link href="/watchlist" className="hover:text-white">
-            Watchlist
-          </Link>
-          <Link href="/profile/you" className="hover:text-white">
-            Profile
-          </Link>
-        </nav>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="rounded-full border border-white/20 px-4 py-2 text-sm text-white hover:border-white/60"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-200"
-          >
-            Create Account
-          </Link>
-        </div>
-      </header>
+  const [trending, setTrending] = useState([]);
 
-      <main className="mx-auto w-full max-w-6xl px-6 pb-24">
+  useEffect(() => {
+    async function loadTrending() {
+      try {
+        const res = await fetch("/api/jikan?action=top&limit=8&filter=airing");
+        const data = await res.json();
+        setTrending(data.anime || []);
+      } catch {
+        // silent
+      }
+    }
+    loadTrending();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-zinc-950 to-black text-white">
+      <Navbar />
+
+      <main className="mx-auto w-full max-w-7xl px-6 pb-24">
+        {/* Hero Section */}
         <section className="grid items-center gap-12 py-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
             <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.3em] text-cyan-300">
@@ -58,13 +43,13 @@ export default function Home() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/discover"
-                className="rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-zinc-900 hover:bg-cyan-300"
+                className="rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-cyan-300"
               >
                 Explore Discovery
               </Link>
               <Link
                 href="/community"
-                className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white hover:border-white/60"
+                className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/60"
               >
                 Join Community
               </Link>
@@ -81,7 +66,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-white/10 via-white/5 to-transparent p-8">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-8">
             <div className="absolute right-6 top-6 rounded-full bg-emerald-400/20 px-3 py-1 text-xs text-emerald-300">
               Live reactions
             </div>
@@ -91,7 +76,7 @@ export default function Home() {
                   Vibe search
                 </div>
                 <div className="mt-2 text-lg font-semibold">
-                  “Late Night Watch” picks
+                  &ldquo;Late Night Watch&rdquo; picks
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2 text-xs text-zinc-300">
                   {["Monochrome", "Cyber Glow", "Lo-fi Nights", "Quiet Drama"].map(
@@ -111,65 +96,112 @@ export default function Home() {
                   <span className="text-zinc-400">Community Choice</span>
                   <span className="text-cyan-300">#1 This Week</span>
                 </div>
-                <div className="mt-2 text-xl font-semibold">Astra Pulse</div>
+                <div className="mt-2 text-xl font-semibold">
+                  {trending[0]?.title || "Astra Pulse"}
+                </div>
                 <p className="mt-2 text-sm text-zinc-400">
-                  Studio Nova • 12 eps • Ongoing
+                  {trending[0]
+                    ? `${trending[0].studio} • ${trending[0].episodes || "?"} eps • ${trending[0].status}`
+                    : "Studio Nova • 12 eps • Ongoing"}
                 </p>
               </div>
-              <div className="rounded-2xl bg-linear-to-r from-cyan-500/20 to-emerald-500/10 p-4 text-sm text-zinc-200">
+              <div className="rounded-2xl bg-gradient-to-r from-cyan-500/20 to-emerald-500/10 p-4 text-sm text-zinc-200">
                 4,812 fans are watching the live episode thread right now.
               </div>
             </div>
           </div>
         </section>
 
+        {/* Feature Pillars */}
         <section className="mt-16 grid gap-6 lg:grid-cols-3">
           {[
             {
               title: "Discovery Engine",
               desc: "Dynamic trending, vibe search, and recommendation signals from real fans.",
+              href: "/discover",
             },
             {
               title: "Social Forum",
               desc: "Megathreads, polls, rich posts, and live reaction rooms per episode.",
+              href: "/community",
             },
             {
               title: "Personalization",
               desc: "Watchlists, contribution scoring, and seasonal bracket votes.",
+              href: "/watchlist",
             },
           ].map((pillar) => (
-            <div
+            <Link
               key={pillar.title}
-              className="rounded-3xl border border-white/10 bg-white/5 p-6"
+              href={pillar.href}
+              className="group rounded-3xl border border-white/10 bg-white/5 p-6 transition hover:border-cyan-400/30"
             >
-              <h3 className="text-xl font-semibold">{pillar.title}</h3>
+              <h3 className="text-xl font-semibold group-hover:text-cyan-400 transition">
+                {pillar.title}
+              </h3>
               <p className="mt-3 text-sm text-zinc-300">{pillar.desc}</p>
-            </div>
+            </Link>
           ))}
         </section>
 
+        {/* Trending Now - Real Data */}
         <section className="mt-16">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold">Trending Now</h2>
-            <Link href="/discover" className="text-sm text-cyan-300">
+            <Link href="/discover" className="text-sm text-cyan-300 hover:underline">
               View all →
             </Link>
           </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {["Nova Rift", "Juniper Sky", "Echo Blossom", "Noir Circuit"].map(
-              (title) => (
-                <div
-                  key={title}
-                  className="rounded-2xl border border-white/10 bg-linear-to-br from-white/5 to-transparent p-4"
+          <div className="mt-6 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+            {trending.length > 0
+              ? trending.map((anime) => (
+                <Link
+                  key={anime.malId}
+                  href={`/discover/${anime.malId}`}
+                  className="group overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent transition hover:border-cyan-400/30"
                 >
-                  <div className="h-32 rounded-xl bg-white/10" />
-                  <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-                  <p className="mt-2 text-sm text-zinc-400">
-                    Community recommendation surge
-                  </p>
+                  <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-900">
+                    {anime.posterUrl ? (
+                      <img
+                        src={anime.posterUrl}
+                        alt={anime.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm text-zinc-600">
+                        No Image
+                      </div>
+                    )}
+                    {anime.score && (
+                      <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-xs font-semibold text-yellow-400 backdrop-blur-sm">
+                        ★ {anime.score.toFixed(1)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <h3 className="line-clamp-2 text-sm font-semibold">
+                      {anime.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-zinc-400">
+                      {anime.studio}
+                    </p>
+                  </div>
+                </Link>
+              ))
+              : // Skeleton fallback
+              Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent"
+                >
+                  <div className="aspect-[3/4] w-full animate-pulse bg-zinc-800 rounded-t-2xl" />
+                  <div className="p-3 space-y-2">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-zinc-800" />
+                    <div className="h-3 w-1/2 animate-pulse rounded bg-zinc-800" />
+                  </div>
                 </div>
-              )
-            )}
+              ))}
           </div>
         </section>
       </main>
